@@ -1,0 +1,156 @@
+<%- include('../common/header.ejs')%>
+<div class="content-body">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="row task">
+              <div class="col-xl-2 col-sm-4 col-6">
+                <div class="task-summary">
+                  <div class="d-flex align-items-baseline">
+                    <h2 class="text-primary count">8</h2>
+                    <span>Not Started</span>
+                  </div>
+                  <p>Tasks assigne</p>
+                </div>
+              </div>
+              <div class="col-xl-2 col-sm-4 col-6">
+                <div class="task-summary">
+                  <div class="d-flex align-items-baseline">
+                    <h2 class="text-purple count">7</h2>
+                    <span>In Progress</span>
+                  </div>
+                  <p>Tasks assigne</p>
+                </div>
+              </div>
+              <div class="col-xl-2 col-sm-4 col-6">
+                <div class="task-summary">
+                  <div class="d-flex align-items-baseline">
+                    <h2 class="text-warning count">13</h2>
+                    <span>Testing</span>
+                  </div>
+                  <p>Tasks assigne</p>
+                </div>
+              </div>
+              <div class="col-xl-2 col-sm-4 col-6">
+                <div class="task-summary">
+                  <div class="d-flex align-items-baseline">
+                    <h2 class="text-danger count">11</h2>
+                    <span>Awaiting</span>
+                  </div>
+                  <p>Tasks assigne</p>
+                </div>
+              </div>
+              <div class="col-xl-2 col-sm-4 col-6">
+                <div class="task-summary">
+                  <div class="d-flex align-items-baseline">
+                    <h2 class="text-success count">21</h2>
+                    <span>Complete</span>
+                  </div>
+                  <p>Tasks assigne</p>
+                </div>
+              </div>
+              <div class="col-xl-2 col-sm-4 col-6">
+                <div class="task-summary">
+                  <div class="d-flex align-items-baseline">
+                    <h2 class="text-danger count">16</h2>
+                    <span>pending</span>
+                  </div>
+                  <p>Tasks assigne</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card dz-card">
+        <div class="table-responsive">
+          <table class="table table-responsive-md">
+            <thead>
+              <tr>
+                <th><strong>S.NO</strong></th>
+                <th><strong>Name</strong></th>
+                <th><strong>Email</strong></th>
+                <th><strong>Phone No.</strong></th>
+                <th><strong>Date</strong></th>
+                <th><strong>is_verified</strong></th>
+                <th><strong>Status</strong></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% user.forEach(function(u,key) { %>
+              <tr>
+                <td><strong><%= key+1 %></strong></td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img
+                      src="<%= u.image %>"
+                      class="rounded-lg me-2"
+                      width="24"
+                      alt=""
+                    />
+
+                    <span class="w-space-no"><%= u.name %></span>
+                  </div>
+                </td>
+                <td><%=u.email%></td>
+                <td><%=u.phonenumber%></td>
+                <td>
+                  <%=new Date(u.date).toLocaleDateString( "en-US", { year:
+                  "numeric", month: "long", day: "numeric", } ) %>
+                </td>
+                <td>
+                  <% if (u.is_verified === 1) { %>
+                  <span class="badge badge-success badge-sm">
+                    Verified<span class="ms-1 fa fa-check"></span>
+                  </span>
+                  <% } else { %>
+                  <span class="badge badge-danger badge-sm">
+                    Not Verified<span class="ms-1 fa fa-warning"></span>
+                  </span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <i class="fa fa-circle text-success me-1"></i> Active
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex">
+                    <a href="#" class="btn btn-danger shadow btn-xs sharp"
+                      ><i class="fa fa-trash"></i
+                    ></a>
+                  </div>
+                </td>
+              </tr>
+
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function formatDate(dateString) {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    const formattedDate = new Date(dateString).toLocaleDateString(
+      "en-US",
+      options
+    );
+    return formattedDate;
+  }
+  console.log(
+    formatDate("Thu Dec 07 2023 22:09:13 GMT+0530 (India Standard Time")
+  );
+</script>
+
+<%- include('../common/footer.ejs')%>
