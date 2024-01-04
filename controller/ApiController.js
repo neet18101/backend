@@ -10,8 +10,9 @@ const { email, emailPassword } = require("../config/config");
 const loacalityDetails = require("../model/localModel");
 
 const amenties = require("../model/amenitiesModal");
-const schedule = require("../model/scheduleModel");
 const rental = require("../model/rentalDetails");
+const gallery = require("../model/galleryModal");
+const schedule = require("../model/scheduleModel");
 
 // Email
 const sendResetPasswordMail = async (name, email, user_id) => {
@@ -207,15 +208,31 @@ const amentiesApi = async (req, res) => {
 };
 const galleryApi = async (req, res) => {
   try {
-    const files = req.file.filename;
-    console.log(files);
-    const imagePaths = files.map((file) => file.path);
-    // Save image information to MongoDB
-    // (Your MongoDB save code here)
+    // Assuming user_id is sent in the request body
+    const files = req.files;
+    const user_id = req.body.user_id;
+    // console.log(req.files)
+
+    const imageArray = [];
+
+    // Save each image to MongoDB
+    for (const file of files) {
+      const image = new gallery({
+        filename: file.filename,
+        path: file.path,
+        user_id: user_id, // Save the user_id along with the image details
+      });
+
+      await image.save();
+      imageArray.push(image);
+    }
 
     res.status(201).json({
-      message: "Property added successfully",
-      images: imagePaths,
+      message: "Images added successfully",
+      images: imageArray.map((img) => ({
+        filename: img.filename,
+        path: img.path,
+      })),
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
@@ -223,11 +240,25 @@ const galleryApi = async (req, res) => {
 };
 const scheduleApi = async (req, res) => {
   try {
-    const schedule = new schedule(req.body);
-    await schedule.save();
-    res.status(201).json({ message: "Property added successfully" });
+    console.log(req.body);
+    const schedules = new schedule(req.body);
+    await schedules.save();
+    res.status(201).json({ message: "schedule added successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const userInfoById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const userInfo = await userModel.findById(userId);
+
+    console.log(userInfo, "userInfo");
+
+    res.status(200).send(userInfo);
+  } catch (error) {
+    res.status(500).send(error);
   }
 };
 
@@ -240,4 +271,5 @@ module.exports = {
   scheduleApi,
   user_loin,
   listProperty,
+  userInfoById,
 };
