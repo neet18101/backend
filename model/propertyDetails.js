@@ -29,7 +29,11 @@ const propertyDetail = new Schema({
     type: Number,
   },
   user_id: {
-    type: String,
+    type: Schema.Types.ObjectId,
+  },
+  is_active: {
+    type: Number,
+    default: 1,
   },
 });
 

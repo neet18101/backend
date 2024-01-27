@@ -12,8 +12,12 @@ const rentalDetails = new mongoose.Schema({
   furnishing: { type: String, default: "" },
   parking: { type: String, default: false },
   user_id: {
-    type: String,
-  }
+    type: mongoose.Types.ObjectId,
+  },
+  is_active: {
+    type: Number,
+    default: 1,
+  },
 });
 
 const rental = mongoose.model("rentalDetails", rentalDetails);

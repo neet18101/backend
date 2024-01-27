@@ -25,18 +25,26 @@ const fileStorage = multer.diskStorage({
     );
   },
 });
+// Custom function to check file type
+const fileFilter = (req, file, cb) => {
+  // Allow images and videos
+  if (
+    file.mimetype.startsWith("image/") ||
+    file.mimetype.startsWith("video/")
+  ) {
+    cb(null, true);
+  } else {
+    cb(new Error("Please upload an Image or Video file!"), false);
+  }
+};
 const uploadImage = multer({
   storage: fileStorage,
   limits: {
-    fileSize: 1000000,
+    fileSize: 10 * 1024 * 1024, // 10MB limit (adjust the value as needed)
   },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(png|jpg)$/)) {
-      return cb(new Error("Please upload an Image file!"));
-    }
-    cb(undefined, true);
-  },
+  fileFilter: fileFilter,
 });
+
 api_route.use(bodyParser.json({ limit: "100mb" }));
 api_route.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 api_route.use("/galleryUpload", express.static("public/gallery"));
@@ -65,5 +73,6 @@ api_route.post(
 api_route.post("/schedule", authenticateToken, apiController.scheduleApi);
 api_route.post("/locality", authenticateToken, apiController.loacalityApi);
 api_route.get("/userInfo", authenticateToken, apiController.userInfoById);
+api_route.get("/owner-details", authenticateToken, apiController.ownerDetails);
 
 module.exports = api_route;

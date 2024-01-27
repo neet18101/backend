@@ -11,7 +11,11 @@ const localModel = new Schema({
     type: String,
   },
   user_id: {
-    type: String,
+    type: Schema.Types.ObjectId,
+  },
+  is_active: {
+    type: Number,
+    default: 1,
   },
 });
 const loacalityDetails = mongoose.model("localModel", localModel);

@@ -12,9 +12,14 @@ const amentiesModal = new Schema({
   propertyAvailable: { type: String, default: "" },
   secondaryNumber: { type: String, default: "" },
   anyDirection: { type: String, default: "" },
+
   user_id: {
-    type: String,
-  }
+    type: Schema.Types.ObjectId,
+  },
+  is_active: {
+    type: Number,
+    default: 1,
+  },
 });
 
 const amenties = mongoose.model("amentiesModal", amentiesModal);

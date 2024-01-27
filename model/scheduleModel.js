@@ -12,7 +12,7 @@ const scheduleModel = new Schema({
     type: String,
   },
   user_id: {
-    type: String,
+    type: Schema.Types.ObjectId,
   },
   is_active: {
     type: Number,

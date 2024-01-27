@@ -115,8 +115,7 @@ const listModal = new Schema({
     require: true,
   },
   user_id: {
-    type: String,
-    require: true,
+    type: Schema.Types.ObjectId,
   },
   date: { type: Date, default: Date.now },
   is_active: { type: Number, default: 1 },

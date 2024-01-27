@@ -1,5 +1,11 @@
 const mongoose = require("mongoose");
 const User = require("../model/userModel");
+const propertyDetails = require("../model/propertyDetails");
+const loacalityDetails = require("../model/localModel");
+const amenties = require("../model/amenitiesModal");
+const rental = require("../model/rentalDetails");
+const gallery = require("../model/galleryModal");
+const schedule = require("../model/scheduleModel");
 
 var mongooseUrl = process.env.DB_URL;
 mongoose.connect(mongooseUrl);
@@ -14,16 +20,16 @@ module.exports = mongoose;
 
 // const seederDB = [
 //   [
-    // {
-    //   name: "John Doe",
-    //   email: "johndoe@example.com",
-    //   phonenumber: "1234567890",
-    //   Date: "2020-01-01",
-    //   is_verified: "1",
-    //   Status: "1",
-    //   image: "https://yashadmin.dexignzone.com/xhtml/images/user.jpg",
-    //   password: "9876543210",
-    // },
+// {
+//   name: "John Doe",
+//   email: "johndoe@example.com",
+//   phonenumber: "1234567890",
+//   Date: "2020-01-01",
+//   is_verified: "1",
+//   Status: "1",
+//   image: "https://yashadmin.dexignzone.com/xhtml/images/user.jpg",
+//   password: "9876543210",
+// },
 //     {
 //       name: "Jane Smith",
 //       email: "janesmith@example.com",
@@ -119,6 +125,12 @@ module.exports = mongoose;
 
 // const seedDB = async () => {
 //   await User.deleteMany({});
+//   await schedule.deleteMany({});
+//   await gallery.deleteMany({});
+//   await rental.deleteMany({});
+//   await amenties.deleteMany({});
+//   await propertyDetails.deleteMany({});
+//   await loacalityDetails.deleteMany({});
 //   // await User.insertMany(seederDB.flat());
 // };
 

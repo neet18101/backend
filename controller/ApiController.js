@@ -13,6 +13,7 @@ const amenties = require("../model/amenitiesModal");
 const rental = require("../model/rentalDetails");
 const gallery = require("../model/galleryModal");
 const schedule = require("../model/scheduleModel");
+const mongoose = require("mongoose");
 
 // Email
 const sendResetPasswordMail = async (name, email, user_id) => {
@@ -52,6 +53,24 @@ const sendResetPasswordMail = async (name, email, user_id) => {
     console.log(error.message);
   }
 };
+// create token
+const create_token = async (data) => {
+  try {
+    const userDataString = JSON.stringify(data);
+
+    const secretKey = process.env.SECERT_JWT_TOKEN;
+    // Encrypt userDataString using AES encryption
+    const encryptedData = CryptoJS.AES.encrypt(
+      userDataString,
+      secretKey
+    ).toString();
+    return encryptedData;
+
+    //
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 // signup Api
 const signupUser = async (req, res, next) => {
   try {
@@ -84,27 +103,31 @@ const signupUser = async (req, res, next) => {
         propertyType,
       });
       const userKaDataSaver = await userData.save();
-      sendResetPasswordMail(
-        userKaDataSaver.name,
-        userKaDataSaver.email,
-        userKaDataSaver._id
-      );
-      return res.status(200).send({
-        success: true,
-        msg: "Sign up successfully & Please Verify Your Email",
-        data: {
-          id: userKaDataSaver._id,
-          type: userKaDataSaver.userType,
-          propertyType: userKaDataSaver.propertyType,
-        },
-      });
-    }
 
+      // sendResetPasswordMail(
+      //   userKaDataSaver.name,
+      //   userKaDataSaver.email,
+      //   userKaDataSaver._id
+      // );
+      const token = await create_token(userKaDataSaver);
+      // console.log(token,"userKaDataSaver");
+
+      const response = {
+        success: true,
+        msg: "Singup Successfully",
+        id: userKaDataSaver._id,
+        type: userKaDataSaver.userType,
+        propertyType: userKaDataSaver.propertyType,
+        token: token,
+      };
+      return res.status(200).send(response);
+    }
     res.status(200).send("Sign up successfully");
   } catch (error) {
     console.log(error.message);
   }
 };
+
 // Login Api
 // const propertyDetails = async (req, res) => {
 //   try {
@@ -114,30 +137,12 @@ const signupUser = async (req, res, next) => {
 //     console.log(error.message);
 //   }
 // };
-// Secure Password
-const create_token = async (data) => {
-  try {
-    const userDataString = JSON.stringify(data);
-    const secretKey = process.env.SECERT_JWT_TOKEN;
-    // Encrypt userDataString using AES encryption
-    const encryptedData = CryptoJS.AES.encrypt(
-      userDataString,
-      secretKey
-    ).toString();
 
-    return encryptedData;
-
-    //
-  } catch (error) {
-    console.log(error.message);
-  }
-};
 // Login Function
 const user_loin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const userData = await userModel.findOne({ email: email });
-
     if (userData) {
       const isPasswordValid = await bcrypt.compare(password, userData.password);
       if (isPasswordValid) {
@@ -146,6 +151,7 @@ const user_loin = async (req, res) => {
           email: userData.email,
           phonenumber: userData.phonenumber,
           image: userData.image,
+          type: userData.userType,
           isNew: true,
         };
         const tokenData = await create_token(dataStore);
@@ -213,26 +219,20 @@ const galleryApi = async (req, res) => {
     const user_id = req.body.user_id;
     // console.log(req.files)
 
-    const imageArray = [];
+    var imageArray = [];
 
     // Save each image to MongoDB
-    for (const file of files) {
-      const image = new gallery({
-        filename: file.filename,
-        path: file.path,
-        user_id: user_id, // Save the user_id along with the image details
-      });
-
-      await image.save();
-      imageArray.push(image);
+    for (i = 0; i < files.length; i++) {
+      imageArray[i] = req.files[i].filename;
     }
-
+    var propertyImage = new gallery({
+      filename: imageArray,
+      user_id: user_id,
+    });
+    const imageSave = await propertyImage.save();
     res.status(201).json({
+      success: true,
       message: "Images added successfully",
-      images: imageArray.map((img) => ({
-        filename: img.filename,
-        path: img.path,
-      })),
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
@@ -254,7 +254,11 @@ const userInfoById = async (req, res) => {
     const userId = req.params.id;
     const userInfo = await userModel.findById(userId);
 
-    console.log(userInfo, "userInfo");
+    if (!userInfo) {
+      return res.status(404).send("User not found");
+    } else {
+      return res.status(200).send(userInfo);
+    }
 
     res.status(200).send(userInfo);
   } catch (error) {
@@ -262,7 +266,159 @@ const userInfoById = async (req, res) => {
   }
 };
 
+//make join collection by using user_id
+const ownerDetails = async (req, res) => {
+  const owner_id = req.query.ownerId;
+  try {
+    let ownerData = await userModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(owner_id),
+          is_active: 1, // Additional global $match stage for the main collection
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "gallerymodals",
+          let: { userId: "$user_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$owner_id", "$$userId"] },
+                    { $eq: ["$is_active", 1] },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                filename: 1,
+              },
+            },
+          ],
+          as: "galleryData",
+        },
+      },
+      {
+        $lookup: {
+          from: "amentiesmodals",
+          let: { userId: "$user_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$owner_id", "$$userId"] },
+                    { $eq: ["$is_active", 1] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "amentiesData",
+        },
+      },
+      {
+        $lookup: {
+          from: "localmodels",
+          let: { userId: "$user_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$owner_id", "$$userId"] },
+                    { $eq: ["$is_active", 1] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "localData",
+        },
+      },
+      {
+        $lookup: {
+          from: "propertymodels",
+          let: { userId: "$user_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$owner_id", "$$userId"] },
+                    { $eq: ["$is_active", 1] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "propertyData",
+        },
+      },
+      {
+        $lookup: {
+          from: "rentaldetails",
+          let: { userId: "$user_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$owner_id", "$$userId"] },
+                    { $eq: ["$is_active", 1] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "rentalData",
+        },
+      },
+      {
+        $lookup: {
+          from: "schedulemodels",
+          let: { userId: "$user_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$owner_id", "$$userId"] },
+                    { $eq: ["$is_active", 1] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "scheduleData",
+        },
+      },
+    ]);
+    if (ownerData.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No Owner found" });
+    }
+
+    res.status(200).json(ownerData);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
+
 module.exports = {
+  ownerDetails,
   signupUser,
   loacalityApi,
   rentalApi,
