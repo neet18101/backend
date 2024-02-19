@@ -14,6 +14,8 @@ const rental = require("../model/rentalDetails");
 const gallery = require("../model/galleryModal");
 const schedule = require("../model/scheduleModel");
 const mongoose = require("mongoose");
+const GalleryImage = require("../model/galleryModal");
+const PropertyDetail = require("../model/propertyDetails");
 
 // Email
 const sendResetPasswordMail = async (name, email, user_id) => {
@@ -90,7 +92,9 @@ const signupUser = async (req, res, next) => {
 
     const checkEmail = await userModel.findOne({ email: email });
     if (checkEmail) {
-      res.status(200).send({ success: false, msg: "Emai Already Exists" });
+      res
+        .status(200)
+        .send({ code: 208, success: false, msg: "Emai Already Exists" });
     } else {
       const userData = new userModel({
         name,
@@ -178,40 +182,45 @@ const user_loin = async (req, res) => {
 // ListPropertys
 const listProperty = async (req, res) => {
   try {
-    const property = new propertyDetails(req.body);
-    await property.save();
-    res.status(201).json({ message: "Property added successfully" });
+    console.log(req.body)
+    // Save gallery images to MongoDB
+    const galleryImages = req.files.map((file) => ({
+      name: file.originalname,
+      size: file.size,
+      type: file.mimetype,
+      data: fs.readFileSync(file.path), // Read the file data as binary
+    }));
+
+    console.log(req.files);
+
+    // const savedImages = await GalleryImage.insertMany(galleryImages);
+
+    // // Delete temporary files after saving to MongoDB
+    // req.files.forEach((file) => {
+    //   fs.unlinkSync(file.path);
+    // });
+
+    // // Construct data object for complete data
+    // const completeData = {
+    //   propertyData: req.body.propertyData,
+    //   localityDetails: req.body.localityDetails,
+    //   rentalDetail: req.body.rentalDetail,
+    //   amenities: req.body.amenities,
+    //   gallery: savedImages.map((image) => image._id), // Store IDs of saved gallery images
+    //   scheduleVisit: req.body.scheduleVisit,
+    // };
+
+    // // Save complete data to MongoDB
+    // await PropertyDetail.create(completeData);
+
+   return res.status(200).json({ message: "Data saved successfully." });
+
+   
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-const loacalityApi = async (req, res) => {
-  try {
-    const loacality = new loacalityDetails(req.body);
-    await loacality.save();
-    res.status(201).json({ message: "Property added successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-const rentalApi = async (req, res) => {
-  try {
-    const rentals = new rental(req.body);
-    await rentals.save();
-    res.status(201).json({ message: "rental added successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-const amentiesApi = async (req, res) => {
-  try {
-    const amentiesData = new amenties(req.body);
-    await amentiesData.save();
-    res.status(201).json({ message: "Property added successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+
 const galleryApi = async (req, res) => {
   try {
     // Assuming user_id is sent in the request body
@@ -223,6 +232,8 @@ const galleryApi = async (req, res) => {
 
     // Save each image to MongoDB
     for (i = 0; i < files.length; i++) {
+      const imagePath = "/public/assets/" + req.files[i].filename;
+      console.log(imagePath);
       imageArray[i] = req.files[i].filename;
     }
     var propertyImage = new gallery({
@@ -420,9 +431,9 @@ const ownerDetails = async (req, res) => {
 module.exports = {
   ownerDetails,
   signupUser,
-  loacalityApi,
-  rentalApi,
-  amentiesApi,
+  // loacalityApi,
+  // rentalApi,
+  // amentiesApi,
   galleryApi,
   scheduleApi,
   user_loin,

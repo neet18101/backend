@@ -1,35 +1,16 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const propertyDetail = new Schema({
-  apartmentType: {
-    type: String,
-  },
-  bhkType: {
-    type: String,
-  },
-  ownerName: {
-    type: String,
-  },
-  email: {
-    type: String,
-  },
-  builtUpArea: {
-    type: String,
-  },
-  facing: {
-    type: String,
-  },
-  floor: {
-    type: String,
-  },
-  propertyAge: {
-    type: String,
-  },
-  totalFloor: {
-    type: Number,
-  },
+
+const propertyDetailSchema = new Schema({
+  propertyData: [Object],
+  localityDetails: Object,
+  rentalDetail: Object,
+  amenities: Object,
+  gallery: [{ type: Schema.Types.ObjectId, ref: "GalleryImage" }], // Reference to gallery images
+  scheduleVisit: Object,
   user_id: {
     type: Schema.Types.ObjectId,
+    ref: "User", // Reference to User model if available
   },
   is_active: {
     type: Number,
@@ -37,5 +18,5 @@ const propertyDetail = new Schema({
   },
 });
 
-const propertyDetails = mongoose.model("propertyModel", propertyDetail);
-module.exports = propertyDetails;
+const PropertyDetail = mongoose.model("PropertyDetail", propertyDetailSchema);
+module.exports = PropertyDetail;

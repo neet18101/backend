@@ -2,24 +2,11 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const galleryModal = new Schema({
-  filename: {
-    type: Array,
-    required: true,
-  },
-  path: {
-    type: String,
-  },
-  video: {
-    type: String,
-  },
-  user_id: {
-    type: Schema.Types.ObjectId,
-  },
-  is_active: {
-    type: Number,
-    default: 1,
-  },
+  name: String,
+  size: Number,
+  type: String,
+  data: Buffer, // Store the image data as binary
 });
 
-const gallery = mongoose.model("galleryModal", galleryModal);
-module.exports = gallery;
+const GalleryImage  = mongoose.model("galleryModal", galleryModal);
+module.exports = GalleryImage ;

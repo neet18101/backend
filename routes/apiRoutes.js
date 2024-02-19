@@ -17,7 +17,7 @@ const authenticateToken = require("../middleware/authenticateToken");
 //============ API Routes User========================//
 // image store
 const fileStorage = multer.diskStorage({
-  destination: "PropertyImage",
+  destination: "/public/assets/",
   filename: (req, file, cb) => {
     cb(
       null,
@@ -62,16 +62,21 @@ api_route.get("/token", (req, res) => {
 });
 api_route.post("/register", authenticateToken, apiController.signupUser);
 api_route.post("/login", authenticateToken, apiController.user_loin);
-api_route.post("/property", authenticateToken, apiController.listProperty);
-api_route.post("/amenities", authenticateToken, apiController.amentiesApi);
-api_route.post("/rental", authenticateToken, apiController.rentalApi);
+api_route.post(
+  "/property",
+  uploadImage.array("gallery"),
+  authenticateToken,
+  apiController.listProperty
+);
+// api_route.post("/amenities", authenticateToken, apiController.amentiesApi);
+// api_route.post("/rental", authenticateToken, apiController.rentalApi);
 api_route.post(
   "/gallery",
   uploadImage.array("images", 4),
   apiController.galleryApi
 );
-api_route.post("/schedule", authenticateToken, apiController.scheduleApi);
-api_route.post("/locality", authenticateToken, apiController.loacalityApi);
+// api_route.post("/schedule", authenticateToken, apiController.scheduleApi);
+// api_route.post("/locality", authenticateToken, apiController.loacalityApi);
 api_route.get("/userInfo", authenticateToken, apiController.userInfoById);
 api_route.get("/owner-details", authenticateToken, apiController.ownerDetails);
 

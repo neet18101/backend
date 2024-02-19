@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const secretKey = "hello6g7yg678g8y"; // Replace with a strong secret in production
 
 const authenticateToken = (req, res, next) => {
-  const token = req.header("Authorization").split(" ")[1];
+  console.log(req.header("Authorization"));
+  const token = req.header("Authorization").split("")[1];
   if (!token) {
     return res.status(401).json({
       error: "Unauthorized",
