@@ -16,7 +16,7 @@
     "nodemon": "^3.0.2"
   },
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "pm2 start index.js"
   },
   "name": "admin",
   "version": "1.0.0",
