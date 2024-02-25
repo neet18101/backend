@@ -16,6 +16,7 @@ const schedule = require("../model/scheduleModel");
 const mongoose = require("mongoose");
 const GalleryImage = require("../model/galleryModal");
 const PropertyDetail = require("../model/propertyDetails");
+const jwt = require("jsonwebtoken");
 
 // Email
 const sendResetPasswordMail = async (name, email, user_id) => {
@@ -54,6 +55,14 @@ const sendResetPasswordMail = async (name, email, user_id) => {
   } catch (error) {
     console.log(error.message);
   }
+};
+
+// create Token
+const generateAccessToken = (data) => {
+  const token = jwt.sign(data, process.env.SECERT_JWT_TOKEN, {
+    expiresIn: "24h",
+  });
+  return token;
 };
 // create token
 const create_token = async (data) => {
@@ -119,10 +128,10 @@ const signupUser = async (req, res, next) => {
       const response = {
         success: true,
         msg: "Singup Successfully",
-        id: userKaDataSaver._id,
-        type: userKaDataSaver.userType,
-        propertyType: userKaDataSaver.propertyType,
-        token: token,
+        // id: userKaDataSaver._id,
+        // type: userKaDataSaver.userType,
+        // propertyType: userKaDataSaver.propertyType,
+        // token: token,
       };
       return res.status(200).send(response);
     }
@@ -158,7 +167,7 @@ const user_loin = async (req, res) => {
           type: userData.userType,
           isNew: true,
         };
-        const tokenData = await create_token(dataStore);
+        const tokenData = await generateAccessToken(dataStore);
         const response = {
           success: true,
           msg: "Login Successfully",
@@ -182,7 +191,7 @@ const user_loin = async (req, res) => {
 // ListPropertys
 const listProperty = async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     // Save gallery images to MongoDB
     const galleryImages = req.files.map((file) => ({
       name: file.originalname,
@@ -213,9 +222,7 @@ const listProperty = async (req, res) => {
     // // Save complete data to MongoDB
     // await PropertyDetail.create(completeData);
 
-   return res.status(200).json({ message: "Data saved successfully." });
-
-   
+    return res.status(200).json({ message: "Data saved successfully." });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
