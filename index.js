@@ -49,6 +49,7 @@ const adminRoute = require("./routes/adminRoute");
 app.use("/", adminRoute);
 
 // //  Api Route
+// Api have
 const apiRoute = require("./routes/apiRoutes");
 app.use("/api/v1", apiRoute);
 
