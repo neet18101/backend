@@ -16,15 +16,16 @@ const apiController = require("../controller/ApiController");
 const authenticateToken = require("../middleware/authenticateToken");
 //============ API Routes User========================//
 // image store
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "/tmp/uploads"); // Use a writeable directory like /tmp
-  },
-  filename: function (req, file, cb) {
-    // ... your filename generation logic
-    cb(null, file.originalname);
+const fileStorage = multer.diskStorage({
+  destination: "temp/uploads/", // Corrected destination path
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
+    );
   },
 });
+
 // Custom function to check file type
 const fileFilter = (req, file, cb) => {
   // Allow images and videos
