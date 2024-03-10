@@ -17,7 +17,7 @@ const authenticateToken = require("../middleware/authenticateToken");
 //============ API Routes User========================//
 // image store
 const fileStorage = multer.diskStorage({
-  destination: "/public/assets/",
+  destination: "/temp/uploads/",
   filename: (req, file, cb) => {
     cb(
       null,
