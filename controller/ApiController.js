@@ -1,7 +1,7 @@
 const path = require("path");
 const ejs = require("ejs");
 const userModel = require("../model/userModel");
-const bcrypt = require('bcryptjs'); 
+const bcrypt = require("bcryptjs");
 const CryptoJS = require("crypto-js");
 const mailer = require("nodemailer");
 const propertyDetails = require("../model/propertyDetails");
@@ -191,38 +191,23 @@ const user_loin = async (req, res) => {
 // ListPropertys
 const listProperty = async (req, res) => {
   try {
-    console.log(req.body);
-    // Save gallery images to MongoDB
-    const galleryImages = req.files.map((file) => ({
-      name: file.originalname,
-      size: file.size,
-      type: file.mimetype,
-      data: fs.readFileSync(file.path), // Read the file data as binary
-    }));
-
-    console.log(req.files);
-
-    // const savedImages = await GalleryImage.insertMany(galleryImages);
-
-    // // Delete temporary files after saving to MongoDB
-    // req.files.forEach((file) => {
-    //   fs.unlinkSync(file.path);
-    // });
+    // console.log(req.body);
 
     // // Construct data object for complete data
-    // const completeData = {
-    //   propertyData: req.body.propertyData,
-    //   localityDetails: req.body.localityDetails,
-    //   rentalDetail: req.body.rentalDetail,
-    //   amenities: req.body.amenities,
-    //   gallery: savedImages.map((image) => image._id), // Store IDs of saved gallery images
-    //   scheduleVisit: req.body.scheduleVisit,
-    // };
+    const completeData = {
+      propertyData: req.body.propertyData,
+      localityDetails: req.body.localityDetails,
+      rentalDetail: req.body.rentalDetail,
+      amenities: req.body.amenities,
+      // gallery: savedImages.map((image) => image._id), // Store IDs of saved gallery images
+      scheduleVisit: req.body.scheduleVisit,
+      user_id: req.body.scheduleVisit?.user_id,
+    };
+    console.log(completeData);
 
     // // Save complete data to MongoDB
-    // await PropertyDetail.create(completeData);
-
-    return res.status(200).json({ message: "Data saved successfully." });
+    await PropertyDetail.create(completeData);
+    return res.status(200).json({ message: "Property added successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
