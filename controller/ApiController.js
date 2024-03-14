@@ -191,25 +191,42 @@ const user_loin = async (req, res) => {
 // ListPropertys
 const listProperty = async (req, res) => {
   try {
-    // console.log(req.body);
+    const {
+      propertyData,
+      localityDetails,
+      rentalDetail,
+      amenities,
+      scheduleVisit,
+    } = req.body;
 
-    // // Construct data object for complete data
+    if (
+      !propertyData ||
+      !localityDetails ||
+      !rentalDetail ||
+      !amenities ||
+      !scheduleVisit
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const completeData = {
-      propertyData: req.body.propertyData,
-      localityDetails: req.body.localityDetails,
-      rentalDetail: req.body.rentalDetail,
-      amenities: req.body.amenities,
-      // gallery: savedImages.map((image) => image._id), // Store IDs of saved gallery images
-      scheduleVisit: req.body.scheduleVisit,
-      user_id: req.body.scheduleVisit?.user_id,
+      propertyData,
+      localityDetails,
+      rentalDetail,
+      amenities,
+      scheduleVisit,
+      user_id: scheduleVisit?.user_id,
     };
-    console.log(completeData);
 
-    // // Save complete data to MongoDB
+    // Save complete data to MongoDB
     await PropertyDetail.create(completeData);
-    return res.status(200).json({ message: "Property added successfully" });
+
+    return res
+      .status(200)
+      .json({ code: 200, message: "Property added successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error listing property:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
