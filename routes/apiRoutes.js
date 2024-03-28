@@ -17,7 +17,7 @@ const authenticateToken = require("../middleware/authenticateToken");
 //============ API Routes User========================//
 // image store
 const fileStorage = multer.diskStorage({
-  destination: "temp/uploads/", // Corrected destination path
+  destination: "public/assets", // Corrected destination path
   filename: (req, file, cb) => {
     cb(
       null,
@@ -48,7 +48,8 @@ const uploadImage = multer({
 
 api_route.use(bodyParser.json({ limit: "100mb" }));
 api_route.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
-api_route.use("/galleryUpload", express.static("public/gallery"));
+api_route.use("/", express.static("public"));
+// api_route.use("/assets", express.static(__dirname + "/temp/uploads"));
 
 api_route.get("/token", (req, res) => {
   const userData = {

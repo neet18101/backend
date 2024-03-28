@@ -160,6 +160,7 @@ const user_loin = async (req, res) => {
       const isPasswordValid = await bcrypt.compare(password, userData.password);
       if (isPasswordValid) {
         const dataStore = {
+          id: userData._id,
           name: userData.name,
           email: userData.email,
           phonenumber: userData.phonenumber,
@@ -186,6 +187,29 @@ const user_loin = async (req, res) => {
     }
   } catch (error) {
     return res.status(400).send(error.message);
+  }
+};
+
+// token verifiction
+
+const verifyToken = async (req, res) => {
+  try {
+    const token =
+      req.body.token || req.query.token || req.headers["authorized"];
+    if (!token) {
+      res
+        .status(200)
+        .send({ success: false, msg: "A Token Is Required Authenticate" });
+    }
+    try {
+      const decode = jwt.verify(token, process.env.SECERT_JWT_TOKEN);
+      req.user = decode;
+    } catch (error) {
+      res.status(400).send("Invalid Token");
+    }
+    return res.status(200).send({ success: true, msg: "Token Verified" });
+  } catch (error) {
+    console.log(error.message);
   }
 };
 // ListPropertys
@@ -231,25 +255,43 @@ const listProperty = async (req, res) => {
 };
 
 const galleryApi = async (req, res) => {
+  const { user_id } = req.body;
+
+  // Check if files were uploaded
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "No files uploaded" });
+  }
+
+  // Check if user_id is present
+  if (!user_id) {
+    return res
+      .status(400)
+      .json({ success: false, status: 400, error: "user_id not found" });
+  }
+
+  const imagePaths = []; // Array to store image paths
+  const imageArray = []; // Array to store file names
+
+  for (const file of req.files) {
+    const imagePath = `/assets/${file.filename}`;
+    console.log(imagePath);
+
+    // Validate and process the image file (optional)
+    // You can add checks for image format, size, etc. here
+
+    imagePaths.push(imagePath); // Store image paths
+    imageArray.push(file.filename); // Store filenames for later use
+  }
   try {
-    // Assuming user_id is sent in the request body
-    const files = req.files;
-    const user_id = req.body.user_id;
-    // console.log(req.files)
-
-    var imageArray = [];
-
-    // Save each image to MongoDB
-    for (i = 0; i < files.length; i++) {
-      const imagePath = "/public/assets/" + req.files[i].filename;
-      console.log(imagePath);
-      imageArray[i] = req.files[i].filename;
-    }
-    var propertyImage = new gallery({
-      filename: imageArray,
+    // Save images only if user_id is present
+    const propertyImage = new GalleryImage({
       user_id: user_id,
+      imagePaths: imagePaths,
     });
-    const imageSave = await propertyImage.save();
+
+    console.log(propertyImage);
+    await propertyImage.save();
+
     res.status(201).json({
       success: true,
       message: "Images added successfully",

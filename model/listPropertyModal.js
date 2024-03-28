@@ -89,7 +89,7 @@ const listModal = new Schema({
   amenties: {
     type: Object, 
     require: true,
-  },
+  },        
   image: {
     type: object,
     require: true,

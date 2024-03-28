@@ -1,0 +1,67 @@
+<%- include('../common/header.ejs')%>
+
+<div class="content-body">
+  <div class="container-fluid">
+    <!-- row -->
+    <div class="row">
+      <% data.forEach(item => { %>
+      <div class="col-lg-3 col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="card-media">
+              <!-- <% item.galleryData.forEach(galleryItem => { %> <%
+              galleryItem.forEach(imagePath => { %>
+              <img src="<%= imagePath %>" alt="" />
+              <% }); %> <% }); %> -->
+            </div>
+            <div class="media-data">
+              <h4>
+                <a href="project.html"
+                  ><%= item.propertyData.apartmentName %></a
+                >
+              </h4>
+
+              <div
+                class="dateformat d-flex justify-content-between align-items-end"
+              >
+                <div class="d-flex">
+                  <a href="#" class="btn btn-primary shadow btn-xs sharp me-1"
+                    ><i class="fa fa-pencil"></i
+                  ></a>
+                  <a href="#" class="btn btn-danger shadow btn-xs sharp"
+                    ><i class="fa fa-trash"></i
+                  ></a>
+                </div>
+                <div>
+                  <span>Date:- 06 Sep 2021</span>
+                </div>
+                <span class="badge badge-success light border-0">active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function formatDate(dateString) {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    const formattedDate = new Date(dateString).toLocaleDateString(
+      "en-US",
+      options
+    );
+    return formattedDate;
+  }
+  console.log(
+    formatDate("Thu Dec 07 2023 22:09:13 GMT+0530 (India Standard Time")
+  );
+</script>
+
+<%- include('../common/footer.ejs')%>

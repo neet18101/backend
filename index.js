@@ -13,6 +13,7 @@ const server = htpp.createServer(app);
 // Serving static files in Express
 app.use(express.static(path.join(__dirname, "public")));
 
+
 // const Product = require("./models/productModel");
 app.use(cors());
 app.use(bodyParser.json());
@@ -36,6 +37,7 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use("/asstes", express.static("temp"));
 app.use(flush());
 
 // Error handling middleware
