@@ -240,6 +240,7 @@ const listProperty = async (req, res) => {
       amenities,
       scheduleVisit,
       user_id: scheduleVisit?.user_id,
+      gallery: [],
     };
 
     // Save complete data to MongoDB
@@ -274,7 +275,7 @@ const galleryApi = async (req, res) => {
 
   for (const file of req.files) {
     const imagePath = `/assets/${file.filename}`;
-    console.log(imagePath);
+    // console.log(imagePath);
 
     // Validate and process the image file (optional)
     // You can add checks for image format, size, etc. here
@@ -284,13 +285,21 @@ const galleryApi = async (req, res) => {
   }
   try {
     // Save images only if user_id is present
-    const propertyImage = new GalleryImage({
+    const propertyImage = await  GalleryImage.create({
       user_id: user_id,
       imagePaths: imagePaths,
     });
 
-    console.log(propertyImage);
-    await propertyImage.save();
+    // console.log(propertyImage);
+    // await propertyImage.crea();
+
+    let objId = new mongoose.Types.ObjectId(propertyImage?._id);
+    console.log(objId, "neet");
+
+    await PropertyDetail.updateOne(
+      { user_id: user_id },
+      { $push: { gallery: objId }, upsert: false, new: true }
+    );
 
     res.status(201).json({
       success: true,

@@ -16,7 +16,7 @@ const rentalDetails = new mongoose.Schema({
   },
   is_active: {
     type: Number,
-    default: 1,
+    default: 1, 
   },
 });
 

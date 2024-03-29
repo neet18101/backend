@@ -7,7 +7,7 @@ const propertyDetailSchema = new Schema({
   rentalDetail: Object,
   amenities: Object,
   scheduleVisit: Object,
-  gallery: { type: Schema.Types.ObjectId, ref: "galleryModal" },
+  gallery: [{ type: Schema.Types.ObjectId, ref: "galleryModal" }],
   user_id: {
     type: Schema.Types.ObjectId,
     ref: "User",
