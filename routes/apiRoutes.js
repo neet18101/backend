@@ -82,4 +82,7 @@ api_route.post(
 api_route.get("/userInfo", authenticateToken, apiController.userInfoById);
 api_route.get("/owner-details", authenticateToken, apiController.ownerDetails);
 
+// <========================= Hoome Page API ========================>
+api_route.get("/home-page", authenticateToken, apiController.homePageApi);
+
 module.exports = api_route;

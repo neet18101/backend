@@ -16,6 +16,7 @@ const schedule = require("../model/scheduleModel");
 const mongoose = require("mongoose");
 const GalleryImage = require("../model/galleryModal");
 const PropertyDetail = require("../model/propertyDetails");
+const findnearbyModel = require("../model/findnearbyModel");
 const jwt = require("jsonwebtoken");
 
 // Email
@@ -244,11 +245,15 @@ const listProperty = async (req, res) => {
     };
 
     // Save complete data to MongoDB
-    await PropertyDetail.create(completeData);
+    const createdProperty = await PropertyDetail.create(completeData);
 
     return res
       .status(200)
-      .json({ code: 200, message: "Property added successfully" });
+      .json({
+        code: 200,
+        message: "Property added successfully",
+        id: createdProperty?._id,
+      });
   } catch (error) {
     console.error("Error listing property:", error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -256,7 +261,7 @@ const listProperty = async (req, res) => {
 };
 
 const galleryApi = async (req, res) => {
-  const { user_id } = req.body;
+  const { user_id, property_id } = req.body;
 
   // Check if files were uploaded
   if (!req.files || req.files.length === 0) {
@@ -285,7 +290,8 @@ const galleryApi = async (req, res) => {
   }
   try {
     // Save images only if user_id is present
-    const propertyImage = await  GalleryImage.create({
+    const propertyImage = await GalleryImage.create({
+      property_id: property_id,
       user_id: user_id,
       imagePaths: imagePaths,
     });
@@ -294,10 +300,10 @@ const galleryApi = async (req, res) => {
     // await propertyImage.crea();
 
     let objId = new mongoose.Types.ObjectId(propertyImage?._id);
-    console.log(objId, "neet");
+    // console.log(objId, "neet");
 
     await PropertyDetail.updateOne(
-      { user_id: user_id },
+      { _id: property_id },
       { $push: { gallery: objId }, upsert: false, new: true }
     );
 
@@ -487,6 +493,44 @@ const ownerDetails = async (req, res) => {
     res.status(400).send(error);
   }
 };
+const homePageApi = async (req, res) => {
+  try {
+    const handPicked = await propertyDetails
+      .find({ is_active: 1, handPicked: true })
+      .populate({ path: "gallery", model: "galleryModal" });
+
+    const featured = await propertyDetails
+      .find({ is_active: 1, featured: true })
+      .populate({ path: "gallery", model: "galleryModal" });
+
+    const findbynear = await findnearbyModel.find({ is_active: true });
+
+    // Modification for handpicked and featured
+    const modifiedHandPicked = handPicked.map(item => ({
+      _id: item._id,
+      apartmentName: item.propertyData[0].apartmentName,
+      gallery: item.gallery[0].imagePaths[0],
+      expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
+    }));
+    const modifiedFeatured = featured.map(item => ({
+      _id: item._id,
+      apartmentName: item.propertyData[0].apartmentName,
+      gallery: item.gallery[0].imagePaths[0],
+      expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
+    }));
+
+    const finalData = {
+      handPicked: modifiedHandPicked,
+      featured: modifiedFeatured,
+      findbynear: findbynear,
+    };
+
+    res.status(200).json(finalData); // Send finalData as JSON response
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 module.exports = {
   ownerDetails,
@@ -499,4 +543,5 @@ module.exports = {
   user_loin,
   listProperty,
   userInfoById,
+  homePageApi,
 };

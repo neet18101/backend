@@ -126,40 +126,10 @@ const postAddCollege = async (req, res, next) => {
 const showProperty = async (req, res, next) => {
   try {
     const pageType = "Show All Property";
-    const data = await propertyDetails.aggregate([
-      {
-        $match: { is_active: 1 }, // Match condition for propertydetails
-      },
-      {
-        $lookup: {
-          from: "gallerymodals", // Collection name for the gallery collection
-          localField: "user_id",
-          foreignField: "user_id",
-          as: "galleryData",
-        },
-      },
-      {
-        $project: {
-          _id: 0, // Exclude _id field if not needed
-          user_id: 1, // Include user_id field from propertydetails
-          propertyData: 1, // Include other fields from propertydetails if needed
-          localityDetails: 1, // Include other fields from propertydetails if needed
-          rentDetail: 1, // Include other fields from propertydetails if needed
-          amenities: 1, // Include other fields from propertydetails if needed
-          scheduleVisit: 1, // Include other fields from propertydetails if needed
-          galleryData: {
-            $map: {
-              input: "$galleryData",
-              as: "gallery",
-              in: {
-                gallery_name: "$$gallery",
-                // Add other fields from gallerymodals if needed
-              },
-            },
-          },
-        },
-      },
-    ]);
+
+    const data = await propertyDetails
+      .find({ is_active: 1 })
+      .populate({ path: "gallery", model: "galleryModal" });
 
     console.log(data);
 

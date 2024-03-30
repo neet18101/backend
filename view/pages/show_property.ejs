@@ -4,20 +4,19 @@
   <div class="container-fluid">
     <!-- row -->
     <div class="row">
-      <% data.forEach(item => { %>
+      <% data.forEach(property => { %>
       <div class="col-lg-3 col-md-6">
         <div class="card">
           <div class="card-body">
             <div class="card-media">
-              <!-- <% item.galleryData.forEach(galleryItem => { %> <%
-              galleryItem.forEach(imagePath => { %>
-              <img src="<%= imagePath %>" alt="" />
-              <% }); %> <% }); %> -->
+              <% property.gallery.forEach(image => { %>
+              <img src="<%= image.imagePaths[0] %>" alt="Property Image" />
+              <% }); %>
             </div>
             <div class="media-data">
               <h4>
-                <a href="project.html"
-                  ><%= item.propertyData.apartmentName %></a
+                <a href="project.html">
+                  <%= property.propertyData[0].apartmentName %></a
                 >
               </h4>
 
