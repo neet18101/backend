@@ -247,13 +247,11 @@ const listProperty = async (req, res) => {
     // Save complete data to MongoDB
     const createdProperty = await PropertyDetail.create(completeData);
 
-    return res
-      .status(200)
-      .json({
-        code: 200,
-        message: "Property added successfully",
-        id: createdProperty?._id,
-      });
+    return res.status(200).json({
+      code: 200,
+      message: "Property added successfully",
+      id: createdProperty?._id,
+    });
   } catch (error) {
     console.error("Error listing property:", error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -493,6 +491,8 @@ const ownerDetails = async (req, res) => {
     res.status(400).send(error);
   }
 };
+
+// <========================Api for home page=========================>
 const homePageApi = async (req, res) => {
   try {
     const handPicked = await propertyDetails
@@ -506,28 +506,54 @@ const homePageApi = async (req, res) => {
     const findbynear = await findnearbyModel.find({ is_active: true });
 
     // Modification for handpicked and featured
-    const modifiedHandPicked = handPicked.map(item => ({
+    const modifiedHandPicked = handPicked.map((item) => ({
       _id: item._id,
       apartmentName: item.propertyData[0].apartmentName,
       gallery: item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
-    const modifiedFeatured = featured.map(item => ({
+    const modifiedFeatured = featured.map((item) => ({
       _id: item._id,
       apartmentName: item.propertyData[0].apartmentName,
       gallery: item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
+    const finalData = [
+      {
+        handPicked: modifiedHandPicked,
+        featured: modifiedFeatured,
+        findbynear: findbynear,
+      },
+    ];
 
-    const finalData = {
-      handPicked: modifiedHandPicked,
-      featured: modifiedFeatured,
-      findbynear: findbynear,
-    };
-
-    res.status(200).json(finalData); // Send finalData as JSON response
+    res
+      .status(200)
+      .json({ code: 200, message: "success", apiVersion: "1.0.0",finalData }); // Send finalData as JSON response
   } catch (error) {
     console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+const searchByLocationApi = async (req, res) => {
+  try {
+    const { query } = req.query;
+    // Perform a search based on the query in city, locality, and landmark
+    const properties = await propertyDetails
+      .find({
+        $or: [
+          { "localityDetails.city": { $regex: new RegExp(query, "i") } }, // Case-insensitive search for city
+          { "localityDetails.locality": { $regex: new RegExp(query, "i") } }, // Case-insensitive search for locality
+          { "localityDetails.landmark": { $regex: new RegExp(query, "i") } }, // Case-insensitive search for landmark
+        ],
+        is_active: 1, // Include additional conditions as needed
+      })
+      .populate({ path: "gallery", model: "galleryModal" }); // Populate the gallery field
+
+    res
+      .status(200)
+      .json({ code: 200, apiVersion: "1.0.0", message: "success", properties });
+  } catch (error) {
+    console.error("Error searching properties:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -544,4 +570,5 @@ module.exports = {
   listProperty,
   userInfoById,
   homePageApi,
+  searchByLocationApi
 };

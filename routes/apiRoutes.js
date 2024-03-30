@@ -84,5 +84,6 @@ api_route.get("/owner-details", authenticateToken, apiController.ownerDetails);
 
 // <========================= Hoome Page API ========================>
 api_route.get("/home-page", authenticateToken, apiController.homePageApi);
+api_route.get("/search", authenticateToken, apiController.searchByLocationApi);
 
 module.exports = api_route;
