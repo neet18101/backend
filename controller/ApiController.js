@@ -19,6 +19,7 @@ const PropertyDetail = require("../model/propertyDetails");
 const findnearbyModel = require("../model/findnearbyModel");
 const jwt = require("jsonwebtoken");
 
+
 // Email
 const sendResetPasswordMail = async (name, email, user_id) => {
   try {
@@ -195,24 +196,33 @@ const user_loin = async (req, res) => {
 
 const verifyToken = async (req, res) => {
   try {
-    const token =
-      req.body.token || req.query.token || req.headers["authorized"];
+    const token = req.query.token;
     if (!token) {
-      res
-        .status(200)
-        .send({ success: false, msg: "A Token Is Required Authenticate" });
+      return res.status(401).send({ success: false, msg: "A Token Is Required to Authenticate" });
     }
+    
     try {
-      const decode = jwt.verify(token, process.env.SECERT_JWT_TOKEN);
-      req.user = decode;
+      const decode = jwt.verify(token, process.env.SECRET_JWT_TOKEN);
+      req.user = decode; // Move this line here after token verification
+      const token_expiry = decode.exp;
+      const current_date = Math.floor(Date.now() / 1000);
+     
     } catch (error) {
-      res.status(400).send("Invalid Token");
+      return res.status(401).send({
+        success: false,
+        msg: "Invalid Token",
+        is_verified: false,
+        is_expired: false,
+      });
     }
-    return res.status(200).send({ success: true, msg: "Token Verified" });
   } catch (error) {
     console.log(error.message);
+    return res.status(500).send({ success: false, msg: "Internal Server Error" });
   }
 };
+
+
+
 // ListPropertys
 const listProperty = async (req, res) => {
   try {
@@ -324,7 +334,7 @@ const scheduleApi = async (req, res) => {
   }
 };
 
-const userInfoById = async (req, res) => {
+const userInfoById = async (req, res) => { 
   try {
     const userId = req.params.id;
     const userInfo = await userModel.findById(userId);
@@ -528,7 +538,7 @@ const homePageApi = async (req, res) => {
 
     res
       .status(200)
-      .json({ code: 200, message: "success", apiVersion: "1.0.0",finalData }); // Send finalData as JSON response
+      .json({ code: 200, message: "success", apiVersion: "1.0.0", finalData }); // Send finalData as JSON response
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -558,6 +568,12 @@ const searchByLocationApi = async (req, res) => {
   }
 };
 
+const filterApi =async(req,res)=>{
+  
+
+
+}
+
 module.exports = {
   ownerDetails,
   signupUser,
@@ -570,5 +586,6 @@ module.exports = {
   listProperty,
   userInfoById,
   homePageApi,
-  searchByLocationApi
+  searchByLocationApi,
+  verifyToken
 };

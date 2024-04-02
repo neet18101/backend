@@ -7,6 +7,7 @@ const multer = require("multer");
 const path = require("path");
 const bodyParser = require("body-parser");
 const verifyToken = require("../middleware/userAuth");
+const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const secretKey = "hello6g7yg678g8y"; // Replace with a strong secret in production
 api_route.use(cors());
@@ -62,8 +63,8 @@ api_route.get("/token", (req, res) => {
     res.json({ token });
   });
 });
-api_route.post("/register", authenticateToken, apiController.signupUser);
-api_route.post("/login", authenticateToken, apiController.user_loin);
+api_route.post("/register", apiController.signupUser);
+api_route.post("/login", apiController.user_loin);
 api_route.post(
   "/property",
   uploadImage.array("gallery"),
@@ -81,7 +82,7 @@ api_route.post(
 // api_route.post("/locality", authenticateToken, apiController.loacalityApi);
 api_route.get("/userInfo", authenticateToken, apiController.userInfoById);
 api_route.get("/owner-details", authenticateToken, apiController.ownerDetails);
-
+api_route.get("/verify", apiController.verifyToken);
 // <========================= Hoome Page API ========================>
 api_route.get("/home-page", authenticateToken, apiController.homePageApi);
 api_route.get("/search", authenticateToken, apiController.searchByLocationApi);
