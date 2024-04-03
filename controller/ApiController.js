@@ -19,7 +19,6 @@ const PropertyDetail = require("../model/propertyDetails");
 const findnearbyModel = require("../model/findnearbyModel");
 const jwt = require("jsonwebtoken");
 
-
 // Email
 const sendResetPasswordMail = async (name, email, user_id) => {
   try {
@@ -62,7 +61,7 @@ const sendResetPasswordMail = async (name, email, user_id) => {
 // create Token
 const generateAccessToken = (data) => {
   const token = jwt.sign(data, process.env.SECERT_JWT_TOKEN, {
-    expiresIn: "24h",
+    expiresIn: "360d",
   });
   return token;
 };
@@ -196,17 +195,21 @@ const user_loin = async (req, res) => {
 
 const verifyToken = async (req, res) => {
   try {
-    const token = req.query.token;
-    if (!token) {
-      return res.status(401).send({ success: false, msg: "A Token Is Required to Authenticate" });
+    const authHeader = req.header("Authorization");
+    if (!authHeader) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Missing token in the request header",
+      });
     }
-    
+    const token = authHeader.split(" ")[1]; // Split by space and get the second element
+    console.log(token);
+
     try {
       const decode = jwt.verify(token, process.env.SECRET_JWT_TOKEN);
       req.user = decode; // Move this line here after token verification
       const token_expiry = decode.exp;
       const current_date = Math.floor(Date.now() / 1000);
-     
     } catch (error) {
       return res.status(401).send({
         success: false,
@@ -217,11 +220,11 @@ const verifyToken = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message);
-    return res.status(500).send({ success: false, msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .send({ success: false, msg: "Internal Server Error" });
   }
 };
-
-
 
 // ListPropertys
 const listProperty = async (req, res) => {
@@ -243,9 +246,12 @@ const listProperty = async (req, res) => {
     ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+    const apartmentName = propertyData?.apartmentName;
+    const property_url = apartmentName.toLowerCase().replace(/\s+/g, "-");
 
     const completeData = {
       propertyData,
+      property_url,
       localityDetails,
       rentalDetail,
       amenities,
@@ -253,7 +259,11 @@ const listProperty = async (req, res) => {
       user_id: scheduleVisit?.user_id,
       gallery: [],
     };
+    // const propertyDetail = new PropertyDetail(completeData);
 
+    // Save the property detail data to MongoDB
+    // await propertyDetail.save();
+    //
     // Save complete data to MongoDB
     const createdProperty = await PropertyDetail.create(completeData);
 
@@ -334,7 +344,7 @@ const scheduleApi = async (req, res) => {
   }
 };
 
-const userInfoById = async (req, res) => { 
+const userInfoById = async (req, res) => {
   try {
     const userId = req.params.id;
     const userInfo = await userModel.findById(userId);
@@ -568,11 +578,46 @@ const searchByLocationApi = async (req, res) => {
   }
 };
 
-const filterApi =async(req,res)=>{
-  
+const filterApi = async (req, res) => {
+  const {
+    city,
+    category,
+    bhkType,
+    priceRange,
+    availability,
+    preferredTenants,
+    furnishing,
+    parking,
+  } = req.query;
+  try {
+    let filter = {};
 
+    if (city) filter["localityDetails.city"] = city;
+    // if (category) filter["propertyData.apartmentType"] = category;
+    if (bhkType) filter["propertyData.bhkType"] = bhkType;
+    if (priceRange) {
+      const [minPrice, maxPrice] = priceRange.split("-");
+      filter["rentalDetail.expectRent"] = {
+        $gte: parseInt(minPrice),
+        $lte: parseInt(maxPrice),
+      };
+    }
+    if (availability) filter["scheduleVisit.availability"] = availability;
+    if (preferredTenants)
+      filter["rentalDetail.preferredTenant"] = preferredTenants;
+    if (furnishing) filter["rentalDetail.furnishing"] = furnishing;
+    if (parking) filter["rentalDetail.parking"] = parking;
 
-}
+    const properties = await propertyDetails.find(filter).populate({
+      path: "gallery",
+      model: "galleryModal",
+    });
+    res.json(properties);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 module.exports = {
   ownerDetails,
@@ -587,5 +632,6 @@ module.exports = {
   userInfoById,
   homePageApi,
   searchByLocationApi,
-  verifyToken
+  verifyToken,
+  filterApi,
 };

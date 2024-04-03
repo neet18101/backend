@@ -87,4 +87,7 @@ api_route.get("/verify", apiController.verifyToken);
 api_route.get("/home-page", authenticateToken, apiController.homePageApi);
 api_route.get("/search", authenticateToken, apiController.searchByLocationApi);
 
+// <========================= Filter  API ========================>
+api_route.get("/filter", authenticateToken, apiController.filterApi);
+
 module.exports = api_route;
