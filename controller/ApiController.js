@@ -528,13 +528,13 @@ const homePageApi = async (req, res) => {
     // Modification for handpicked and featured
     const modifiedHandPicked = handPicked.map((item) => ({
       _id: item._id,
-      apartmentName: item.propertyData[0].apartmentName,
+      // apartmentName: item.propertyData[0].apartmentName,
       gallery: item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
     const modifiedFeatured = featured.map((item) => ({
       _id: item._id,
-      apartmentName: item.propertyData[0].apartmentName,
+      // apartmentName: item.propertyData[0].apartmentName,
       gallery: item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
