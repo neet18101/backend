@@ -699,5 +699,5 @@ module.exports = {
   verifyToken,
   filterApi,
   productByUrlApi,
-  propertyByOwnerId
+  propertyByOwnerId,
 };
