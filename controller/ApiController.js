@@ -614,9 +614,46 @@ const filterApi = async (req, res) => {
       path: "gallery",
       model: "galleryModal",
     });
-    res
-      .status(200)
-      .json({ code: 200, apiVersion: "1.0.0", message: "success", properties });
+
+    if (properties.length === 0) {
+      return res.status(404).json({
+        code: 404,
+        apiVersion: "1.0.0",
+        message: "No properties found matching the provided filters",
+      });
+    }
+
+    res.status(200).json({
+      code: 200,
+      apiVersion: "1.0.0",
+      message: "success",
+      properties,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const productByUrlApi = async (req, res) => {
+  const { url } = req.params;
+  try {
+    const property = await propertyDetails
+      .findOne({ property_url: url })
+      .populate({ path: "gallery", model: "galleryModal" });
+    if (!property) {
+      return res.status(404).json({
+        code: 404,
+        apiVersion: "1.0.0",
+        message: "Property not found",
+      });
+    }
+    res.status(200).json({
+      code: 200,
+      apiVersion: "1.0.0",
+      message: "success",
+      property,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -638,4 +675,5 @@ module.exports = {
   searchByLocationApi,
   verifyToken,
   filterApi,
+  productByUrlApi,
 };

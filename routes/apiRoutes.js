@@ -90,4 +90,11 @@ api_route.get("/search", authenticateToken, apiController.searchByLocationApi);
 // <========================= Filter  API ========================>
 api_route.get("/filter", authenticateToken, apiController.filterApi);
 
+// <========================= productByUrl  API ========================>
+api_route.get(
+  "/product/:url",
+  authenticateToken,
+  apiController.productByUrlApi
+);
+
 module.exports = api_route;
