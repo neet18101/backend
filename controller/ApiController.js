@@ -660,6 +660,29 @@ const productByUrlApi = async (req, res) => {
   }
 };
 
+const propertyByOwnerId = async (req, res) => {
+  const { user_id } = req.query;
+  try {
+    const userInfo = await userModel
+      .findById(user_id)
+      .select("name email phonenumber userType");
+    const properties = await propertyDetails
+      .find({ user_id: user_id })
+      .populate([{ path: "gallery", model: "galleryModal" }]);
+
+    res.status(200).json({
+      code: 200,
+      apiVersion: "1.0.0",
+      message: "success",
+      userInfo,
+      properties,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   ownerDetails,
   signupUser,
@@ -676,4 +699,5 @@ module.exports = {
   verifyToken,
   filterApi,
   productByUrlApi,
+  propertyByOwnerId
 };

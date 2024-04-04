@@ -96,5 +96,11 @@ api_route.get(
   authenticateToken,
   apiController.productByUrlApi
 );
+// <========================= propertyByOwnerId  API ========================>\
+api_route.get(
+  "/property",
+  authenticateToken,
+  apiController.propertyByOwnerId
+);
 
 module.exports = api_route;
