@@ -131,7 +131,7 @@ const showProperty = async (req, res, next) => {
       .find({ is_active: 1 })
       .populate({ path: "gallery", model: "galleryModal" });
 
-    console.log(data);
+    // console.log(data);
 
     res.render("pages/show_property", { pageType: pageType, data });
   } catch (error) {

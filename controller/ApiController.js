@@ -528,13 +528,15 @@ const homePageApi = async (req, res) => {
     // Modification for handpicked and featured
     const modifiedHandPicked = handPicked.map((item) => ({
       _id: item._id,
-      // apartmentName: item.propertyData[0].apartmentName,
+      apartmentName: item.propertyData.apartmentName,
+      property_url: item.property_url,
       gallery: item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
     const modifiedFeatured = featured.map((item) => ({
       _id: item._id,
-      // apartmentName: item.propertyData[0].apartmentName,
+      apartmentName: item.propertyData.apartmentName,
+      property_url: item.property_url,
       gallery: item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
@@ -612,7 +614,9 @@ const filterApi = async (req, res) => {
       path: "gallery",
       model: "galleryModal",
     });
-    res.json(properties);
+    res
+      .status(200)
+      .json({ code: 200, apiVersion: "1.0.0", message: "success", properties });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
