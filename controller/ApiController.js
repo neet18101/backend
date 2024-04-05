@@ -525,6 +525,12 @@ const homePageApi = async (req, res) => {
 
     const findbynear = await findnearbyModel.find({ is_active: true });
 
+    // const url = new URL(window.location.href);
+    // const hostname = url.hostname;
+    // console.log(hostname);
+    const currentUrl = req.protocol + "://" + req.get("host");
+    // console.log("Current URL:", currentUrl);
+
     // Modification for handpicked and featured
     const modifiedHandPicked = handPicked.map((item) => ({
       _id: item._id,
@@ -537,7 +543,7 @@ const homePageApi = async (req, res) => {
       _id: item._id,
       apartmentName: item.propertyData.apartmentName,
       property_url: item.property_url,
-      gallery: item.gallery[0].imagePaths[0],
+      gallery: currentUrl + item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
     const finalData = [
@@ -547,6 +553,7 @@ const homePageApi = async (req, res) => {
         findbynear: findbynear,
       },
     ];
+
 
     res
       .status(200)
