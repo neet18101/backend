@@ -20,6 +20,8 @@ const findnearbyModel = require("../model/findnearbyModel");
 const jwt = require("jsonwebtoken");
 
 // Email
+const currentUrl = req.protocol + "://" + req.get("host");
+
 const sendResetPasswordMail = async (name, email, user_id) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -528,7 +530,6 @@ const homePageApi = async (req, res) => {
     // const url = new URL(window.location.href);
     // const hostname = url.hostname;
     // console.log(hostname);
-    const currentUrl = req.protocol + "://" + req.get("host");
     // console.log("Current URL:", currentUrl);
 
     // Modification for handpicked and featured
@@ -536,7 +537,7 @@ const homePageApi = async (req, res) => {
       _id: item._id,
       apartmentName: item.propertyData.apartmentName,
       property_url: item.property_url,
-      gallery: item.gallery[0].imagePaths[0],
+      gallery: currentUrl + item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
     const modifiedFeatured = featured.map((item) => ({
@@ -546,14 +547,20 @@ const homePageApi = async (req, res) => {
       gallery: currentUrl + item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
+
+    const findByCollege = findbynear.map((item) => ({
+      _id: item._id,
+      name: item.name,
+      location: item.location,
+      image: currentUrl + item.image,
+    }));
     const finalData = [
       {
         handPicked: modifiedHandPicked,
         featured: modifiedFeatured,
-        findbynear: findbynear,
+        findbynear: findByCollege,
       },
     ];
-
 
     res
       .status(200)
