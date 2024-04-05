@@ -21,7 +21,6 @@ const jwt = require("jsonwebtoken");
 
 // Email
 
-
 const sendResetPasswordMail = async (name, email, user_id) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -574,6 +573,7 @@ const homePageApi = async (req, res) => {
 const searchByLocationApi = async (req, res) => {
   try {
     const { query } = req.query;
+    const currentUrl = req.protocol + "://" + req.get("host");
     // Perform a search based on the query in city, locality, and landmark
     const properties = await propertyDetails
       .find({
@@ -586,9 +586,23 @@ const searchByLocationApi = async (req, res) => {
       })
       .populate({ path: "gallery", model: "galleryModal" }); // Populate the gallery field
 
-    res
-      .status(200)
-      .json({ code: 200, apiVersion: "1.0.0", message: "success", properties });
+    const property_data = properties?.map((item) => ({
+      propertyData: item.propertyData,
+      property_url: item.property_url,
+      localityDetails: item.localityDetails,
+      rentalDetail: item.rentalDetail,
+      amenities: item.amenities,
+      image: currentUrl + item.gallery[0].imagePaths[0],
+
+      // If you want to keep the mapped value, return it here
+    }));
+
+    return res.status(200).json({
+      code: 200,
+      apiVersion: "1.0.0",
+      message: "success",
+      property_data,
+    });
   } catch (error) {
     console.error("Error searching properties:", error);
     res.status(500).json({ error: "Internal Server Error" });
