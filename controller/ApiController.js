@@ -62,7 +62,7 @@ const sendResetPasswordMail = async (name, email, user_id) => {
 // create Token
 const generateAccessToken = (data) => {
   const token = jwt.sign(data, process.env.SECERT_JWT_TOKEN, {
-    expiresIn: "360d",
+    expiresIn: "1m",
   });
   return token;
 };
@@ -143,16 +143,6 @@ const signupUser = async (req, res, next) => {
   }
 };
 
-// Login Api
-// const propertyDetails = async (req, res) => {
-//   try {
-//     const property = await userModel.findOne({ _id: req.params.id });
-//     res.status(200).send({ success: true, data: property });
-//   } catch (error) {
-//     console.log(error.message);
-//   }
-// };
-
 // Login Function
 const user_loin = async (req, res) => {
   try {
@@ -193,37 +183,34 @@ const user_loin = async (req, res) => {
 };
 
 // token verifiction
-
-const verifyToken = async (req, res) => {
-  try {
-    const authHeader = req.header("Authorization");
-    if (!authHeader) {
-      return res.status(401).json({
-        error: "Unauthorized",
-        message: "Missing token in the request header",
-      });
-    }
-    const token = authHeader.split(" ")[1]; // Split by space and get the second element
-    console.log(token);
-
-    try {
-      const decode = jwt.verify(token, process.env.SECRET_JWT_TOKEN);
-      req.user = decode; // Move this line here after token verification
-      const token_expiry = decode.exp;
-      const current_date = Math.floor(Date.now() / 1000);
-    } catch (error) {
-      return res.status(401).send({
+const userTokenVerify = async (req, res) => {
+  jwt.verify(req.token, process.env.SECERT_JWT_TOKEN, (err, authData) => {
+    if (err?.name === "TokenExpiredError") {
+      res.send({
         success: false,
-        msg: "Invalid Token",
+        msg: "Token Expired",
+        isExpired: true,
         is_verified: false,
-        is_expired: false,
+      });
+    } else {
+      res.send({
+        success: true,
+        msg: "Token Verified",
+        isVerified: true,
+        is_Expired: false,
       });
     }
-  } catch (error) {
-    console.log(error.message);
-    return res
-      .status(500)
-      .send({ success: false, msg: "Internal Server Error" });
+  });
+};
+const verifyToken = async (req, res, next) => {
+  const bearerHeader = req.headers["authorization"];
+  if (typeof bearerHeader !== undefined) {
+    const bearer = bearerHeader.split(" ");
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+    next();
+  } else {
+    return res.status(400).send({ success: false, msg: "token not found" });
   }
 };
 
@@ -729,4 +716,5 @@ module.exports = {
   filterApi,
   productByUrlApi,
   propertyByOwnerId,
+  userTokenVerify,
 };

@@ -1,18 +1,15 @@
 const jwt = require("jsonwebtoken");
-const key = "hellosir";
-const verifyToken = async (req, res, next) => {
-  const token = req.body.token || req.query.token || req.headers["authorized"];
-  if (!token) {
-    res
-      .status(200)
-      .send({ success: false, msg: "A Token Is Required Authenticate" });
+
+const userAuth = (req, res, next) => {
+  const bearerHeader = req.headers["authorization"];
+  if (typeof bearerHeader !== undefined) {
+    const bearer = bearerHeader.split(" ");
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+    next();
+  } else {
+    return res.status(400).send({ success: false, msg: "token not found" });
   }
-  try {
-    const decode = jwt.verify(token, key);
-    req.user = decode;
-  } catch (error) {
-    res.status(400).send("Invalid Token");
-  }
-  return next();
 };
-module.exports = verifyToken;
+
+module.exports = userAuth;
