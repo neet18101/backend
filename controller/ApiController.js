@@ -20,7 +20,7 @@ const findnearbyModel = require("../model/findnearbyModel");
 const jwt = require("jsonwebtoken");
 
 // Email
-const currentUrl = req.protocol + "://" + req.get("host");
+
 
 const sendResetPasswordMail = async (name, email, user_id) => {
   try {
@@ -526,6 +526,7 @@ const homePageApi = async (req, res) => {
       .populate({ path: "gallery", model: "galleryModal" });
 
     const findbynear = await findnearbyModel.find({ is_active: true });
+    const currentUrl = req.protocol + "://" + req.get("host");
 
     // const url = new URL(window.location.href);
     // const hostname = url.hostname;
