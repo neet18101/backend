@@ -196,7 +196,7 @@ const userTokenVerify = async (req, res) => {
       res.send({
         success: true,
         msg: "Token Verified",
-        isVerified: true,
+        is_Verified: true,
         is_Expired: false,
       });
     }
