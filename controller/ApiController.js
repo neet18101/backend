@@ -62,7 +62,7 @@ const sendResetPasswordMail = async (name, email, user_id) => {
 // create Token
 const generateAccessToken = (data) => {
   const token = jwt.sign(data, process.env.SECERT_JWT_TOKEN, {
-    expiresIn: "1m",
+    expiresIn: "24h",
   });
   return token;
 };
