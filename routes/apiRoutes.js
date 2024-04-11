@@ -100,4 +100,8 @@
   // <========================= propertyByOwnerId  API ========================>\
   api_route.get("/property", authenticateToken, apiController.propertyByOwnerId);
 
+  // <========================= getOwnerDetails  API ========================>\
+  api_route.get("/get-owner-details", authenticateToken, apiController.getOwnerDetails);
+  api_route.get("/all-requests", authenticateToken, apiController.user_all_requests);
+
   module.exports = api_route;

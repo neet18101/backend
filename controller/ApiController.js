@@ -17,6 +17,7 @@ const mongoose = require("mongoose");
 const GalleryImage = require("../model/galleryModal");
 const PropertyDetail = require("../model/propertyDetails");
 const findnearbyModel = require("../model/findnearbyModel");
+const ownerDetails = require("../model/getOwnerDetailModel");
 const jwt = require("jsonwebtoken");
 
 // Email
@@ -350,155 +351,6 @@ const userInfoById = async (req, res) => {
 };
 
 //make join collection by using user_id
-const ownerDetails = async (req, res) => {
-  const owner_id = req.query.ownerId;
-  try {
-    let ownerData = await userModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(owner_id),
-          is_active: 1, // Additional global $match stage for the main collection
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          email: 1,
-        },
-      },
-
-      {
-        $lookup: {
-          from: "gallerymodals",
-          let: { userId: "$user_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$owner_id", "$$userId"] },
-                    { $eq: ["$is_active", 1] },
-                  ],
-                },
-              },
-            },
-            {
-              $project: {
-                filename: 1,
-              },
-            },
-          ],
-          as: "galleryData",
-        },
-      },
-      {
-        $lookup: {
-          from: "amentiesmodals",
-          let: { userId: "$user_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$owner_id", "$$userId"] },
-                    { $eq: ["$is_active", 1] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "amentiesData",
-        },
-      },
-      {
-        $lookup: {
-          from: "localmodels",
-          let: { userId: "$user_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$owner_id", "$$userId"] },
-                    { $eq: ["$is_active", 1] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "localData",
-        },
-      },
-      {
-        $lookup: {
-          from: "propertymodels",
-          let: { userId: "$user_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$owner_id", "$$userId"] },
-                    { $eq: ["$is_active", 1] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "propertyData",
-        },
-      },
-      {
-        $lookup: {
-          from: "rentaldetails",
-          let: { userId: "$user_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$owner_id", "$$userId"] },
-                    { $eq: ["$is_active", 1] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "rentalData",
-        },
-      },
-      {
-        $lookup: {
-          from: "schedulemodels",
-          let: { userId: "$user_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$owner_id", "$$userId"] },
-                    { $eq: ["$is_active", 1] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "scheduleData",
-        },
-      },
-    ]);
-    if (ownerData.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No Owner found" });
-    }
-
-    res.status(200).json(ownerData);
-  } catch (error) {
-    res.status(400).send(error);
-  }
-};
 
 // <========================Api for home page=========================>
 const homePageApi = async (req, res) => {
@@ -523,13 +375,23 @@ const homePageApi = async (req, res) => {
     const modifiedHandPicked = handPicked.map((item) => ({
       _id: item._id,
       apartmentName: item.propertyData.apartmentName,
+      city: item.localityDetails.city,
+      locality: item.localityDetails.locality,
+      landmark: item.localityDetails.landmark,
       property_url: item.property_url,
+      rating: 4.5,
+      amenities: item.amenities,
       gallery: currentUrl + item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
     }));
     const modifiedFeatured = featured.map((item) => ({
       _id: item._id,
       apartmentName: item.propertyData.apartmentName,
+      city: item.localityDetails.city,
+      locality: item.localityDetails.locality,
+      landmark: item.localityDetails.landmark,
+      rating: 4.5,
+      amenities: item.amenities,
       property_url: item.property_url,
       gallery: currentUrl + item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
@@ -699,6 +561,102 @@ const propertyByOwnerId = async (req, res) => {
   }
 };
 
+// send email to owner after booking
+const sendMailToOwner = async (property_id, property_url, user_id) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "luciferlordsa321@gmail.com",
+        pass: "gobxbiovuyuiggxh",
+      },
+    });
+
+    const getPropertyById = await propertyDetails.findById(property_id);
+    console.log(getPropertyById);
+
+    return res.status(200).json({
+      code: 200,
+      apiVersion: "1.0.0",
+      message: "success",
+      getPropertyById,
+    });
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
+const getOwnerDetails = async (req, res) => {
+  try {
+    const { property_url, property_id, user_id } = req.body;
+    if (!property_url || !property_id || !user_id) {
+      res.status(400).send("All fields are required");
+    }
+    // Check if the property_id is already associated with the user_id
+    const existingOwnerData = await ownerDetails.findOne({
+      property_id,
+      user_id,
+    });
+    if (existingOwnerData) {
+      return res.status(400).json({
+        code: 400,
+        apiVersion: "1.0.0",
+        message: "Property already added by the user",
+      });
+    }
+
+    const ownerDataSave = new ownerDetails({
+      property_url,
+      property_id,
+      user_id,
+    });
+    sendMailToOwner(property_id, property_url, user_id);
+
+    const userKaDataSaver = await ownerDataSave.save();
+
+    return res.status(200).json({
+      code: 200,
+      apiVersion: "1.0.0",
+      message: "success",
+      // userKaDataSaver,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// <======================== username  dashboard ==========================>
+const user_all_requests = async (req, res) => {
+  try {
+    const { user_id } = req.query;
+    console.log(user_id);
+
+    const owner_id = await ownerDetails.find({ user_id: user_id });
+    console.log(owner_id);
+    if (!ownerDetails) {
+      return res.status(404).json({
+        code: 404,
+        apiVersion: "1.0.0",
+        message: "Owner not found",
+      });
+    }
+    // // Extract property_id from owner details
+    const { property_id } = ownerDetails;
+    const property_data = await propertyDetails.find({ _id: property_id });
+    const responseData = {
+      owner_details: ownerDetails,
+      property: property_data,
+    };
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   ownerDetails,
   signupUser,
@@ -717,4 +675,6 @@ module.exports = {
   productByUrlApi,
   propertyByOwnerId,
   userTokenVerify,
+  getOwnerDetails,
+  user_all_requests,
 };
