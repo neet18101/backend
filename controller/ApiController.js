@@ -380,6 +380,7 @@ const homePageApi = async (req, res) => {
       landmark: item.localityDetails.landmark,
       property_url: item.property_url,
       rating: 4.5,
+      place_for: "man",
       amenities: item.amenities,
       gallery: currentUrl + item.gallery[0].imagePaths[0],
       expectRent: item.rentalDetail.expectRent, // Assuming you want only the first image path
