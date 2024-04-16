@@ -374,10 +374,11 @@ const homePageApi = async (req, res) => {
     // Modification for handpicked and featured
     const modifiedHandPicked = handPicked.map((item) => ({
       _id: item._id,
-      apartmentName: item.propertyData.apartmentName,
+      propertYDetails: item.propertyData,
       city: item.localityDetails.city,
       locality: item.localityDetails.locality,
       landmark: item.localityDetails.landmark,
+      rentalDetail: item.rentalDetail,
       property_url: item.property_url,
       rating: 4.5,
       place_for: "man",
@@ -387,10 +388,11 @@ const homePageApi = async (req, res) => {
     }));
     const modifiedFeatured = featured.map((item) => ({
       _id: item._id,
-      apartmentName: item.propertyData.apartmentName,
+      propertYDetails: item.propertyData,
       city: item.localityDetails.city,
       locality: item.localityDetails.locality,
       landmark: item.localityDetails.landmark,
+      rentalDetail: item.rentalDetail,
       rating: 4.5,
       amenities: item.amenities,
       property_url: item.property_url,
