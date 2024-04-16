@@ -267,6 +267,8 @@ const listProperty = async (req, res) => {
   }
 };
 
+// pglist api
+
 const galleryApi = async (req, res) => {
   const { user_id, property_id } = req.body;
 
@@ -393,6 +395,7 @@ const homePageApi = async (req, res) => {
       locality: item.localityDetails.locality,
       landmark: item.localityDetails.landmark,
       rentalDetail: item.rentalDetail,
+      place_for: "man",
       rating: 4.5,
       amenities: item.amenities,
       property_url: item.property_url,
