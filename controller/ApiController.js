@@ -20,6 +20,9 @@ const findnearbyModel = require("../model/findnearbyModel");
 const ownerDetails = require("../model/getOwnerDetailModel");
 const jwt = require("jsonwebtoken");
 
+const pgList = require("../model/pglistModal");
+const PgListGalleryImage = require("../model/pglistGalleryModal");
+
 // Email
 
 const sendResetPasswordMail = async (name, email, user_id) => {
@@ -269,6 +272,92 @@ const listProperty = async (req, res) => {
 
 // pglist api
 
+const pglistApi = async (req, res) => {
+  try {
+    const { amenities, location, pgDetails, tenantPreferences, availability } =
+      req.body;
+    if (
+      !amenities ||
+      !location ||
+      !pgDetails ||
+      !tenantPreferences ||
+      !availability
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const pgName = pgDetails?.pgName;
+    const pg_url = pgName.toLowerCase().replace(/\s+/g, "-");
+    const completeData = {
+      amenities,
+      location,
+      pgDetails,
+      tenantPreferences,
+      availability,
+      user_id: availability?.user_id,
+      pg_url: pg_url,
+      gallery: [],
+    };
+    const createdProperty = await pgList.create(completeData);
+
+    return res.status(200).json({
+      code: 200,
+      message: "Property added successfully",
+      id: createdProperty?._id,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const pg_list_gallery_api = async (req, res) => {
+  try {
+    const { user_id, pg_id } = req.body;
+    // Check if files were uploaded
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "No files uploaded" });
+    }
+
+    // Check if user_id is present
+    if (!user_id) {
+      return res
+        .status(400)
+        .json({ success: false, status: 400, error: "user_id not found" });
+    }
+
+    const imagePaths = []; // Array to store image paths
+    const imageArray = []; // Array to store file names
+
+    for (const file of req.files) {
+      const imagePath = `/assets/${file.filename}`;
+      // console.log(imagePath);
+
+      // Validate and process the image file (optional)
+      // You can add checks for image format, size, etc. here
+
+      imagePaths.push(imagePath); // Store image paths
+      imageArray.push(file.filename); // Store filenames for later use
+    }
+    const pgImage = await PgListGalleryImage.create({
+      pg_id: pg_id,
+      user_id: user_id,
+      imagePaths: imagePaths,
+    });
+    let objId = new mongoose.Types.ObjectId(pgImage?._id);
+    // console.log(objId, "neet");
+    await pgList.updateOne(
+      { _id: pg_id },
+      { $push: { gallery: objId }, upsert: false, new: true }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Images added successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 const galleryApi = async (req, res) => {
   const { user_id, property_id } = req.body;
 
@@ -467,6 +556,7 @@ const searchByLocationApi = async (req, res) => {
 const filterApi = async (req, res) => {
   const {
     city,
+    filter_type,
     category,
     bhkType,
     priceRange,
@@ -474,9 +564,15 @@ const filterApi = async (req, res) => {
     preferredTenants,
     furnishing,
     parking,
+    gender,
   } = req.query;
   try {
     let filter = {};
+
+    if (filter_type === "pg") {
+      if (gender) filter["tenantPreferences.gender"] = gender;
+      if(room_type) filter[""]
+    }
 
     if (city) filter["localityDetails.city"] = city;
     // if (category) filter["propertyData.apartmentType"] = category;
@@ -683,4 +779,6 @@ module.exports = {
   userTokenVerify,
   getOwnerDetails,
   user_all_requests,
+  pglistApi,
+  pg_list_gallery_api,
 };

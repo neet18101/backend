@@ -72,7 +72,7 @@ const PglistSchema = new Schema({
   tenantPreferences: tenantPreferencesSchema,
   availability: availabilitySchema,
   pg_url: String,
-  gallery: [{ type: Schema.Types.ObjectId, ref: "galleryModal" }],
+  gallery: [{ type: Schema.Types.ObjectId, ref: "pglistGalleryModal" }],
   user_id: {
     type: Schema.Types.ObjectId,
     ref: "User",

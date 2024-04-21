@@ -72,12 +72,20 @@ api_route.post(
   authenticateToken,
   apiController.listProperty
 );
+
+// <========================= PGlist  API ========================>
+api_route.post("/add-pg", authenticateToken, apiController.pglistApi);
 // api_route.post("/amenities", authenticateToken, apiController.amentiesApi);
 // api_route.post("/rental", authenticateToken, apiController.rentalApi);
 api_route.post(
   "/gallery",
   uploadImage.array("images", 4),
   apiController.galleryApi
+);
+api_route.post(
+  "/pg-gallery",
+  uploadImage.array("images", 4),
+  apiController.pg_list_gallery_api
 );
 // api_route.post("/schedule", authenticateToken, apiController.scheduleApi);
 // api_route.post("/locality", authenticateToken, apiController.loacalityApi);
@@ -101,7 +109,7 @@ api_route.get(
 api_route.get("/property", authenticateToken, apiController.propertyByOwnerId);
 
 // <========================= getOwnerDetails  API ========================>\
-api_route.get(
+api_route.post(
   "/get-owner-details",
   authenticateToken,
   apiController.getOwnerDetails
