@@ -100,11 +100,7 @@ api_route.get("/search", authenticateToken, apiController.searchByLocationApi);
 api_route.get("/filter", authenticateToken, apiController.filterApi);
 
 // <========================= productByUrl  API ========================>
-api_route.get(
-  "/product/:url",
-  authenticateToken,
-  apiController.productByUrlApi
-);
+api_route.get("/product/:url", apiController.productByUrlApi);
 // <========================= propertyByOwnerId  API ========================>\
 api_route.get("/property", authenticateToken, apiController.propertyByOwnerId);
 
